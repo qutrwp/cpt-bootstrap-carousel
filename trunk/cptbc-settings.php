@@ -42,6 +42,8 @@ function cptbc_set_options (){
 		'background_images_height' => '500',
 		'background_images_style_size' => 'cover',
 		'use_javascript_animation' => '1',
+		'homepage_autoplay' => '1',
+		'homepage_interval' => '5000',
 	);
 	add_option('cptbc_settings', $defaults);
 }
@@ -123,6 +125,12 @@ class cptbc_settings_page {
 				'cptbc_settings_markup', // ID
 				__('Custom Markup', 'cpt-bootstrap-carousel'), // Title
 				array( $this, 'cptbc_settings_markup_header' ), // Callback
+				'cpt-bootstrap-carousel' // Page
+		);
+		add_settings_section(
+				'cptbc_settings_homepage', // ID
+				__('Homepage Settings', 'cpt-bootstrap-carousel'), // Title
+				array( $this, 'cptbc_settings_homepage_header' ), // Callback
 				'cpt-bootstrap-carousel' // Page
 		);
         
@@ -316,6 +324,22 @@ class cptbc_settings_page {
 				'cpt-bootstrap-carousel', // Page
 				'cptbc_settings_markup' // Section
 		);
+
+		// Homepage Section
+		add_settings_field(
+				'homepage_autoplay', // ID
+				__('Autoplay carousel', 'cpt-bootstrap-carousel'), // Title
+				array( $this, 'homepage_autoplay_callback' ), // Callback
+				'cpt-bootstrap-carousel', // Page
+				'cptbc_settings_homepage' // Section
+		);
+		add_settings_field(
+				'homepage_interval', // ID
+				__('Slide Interval (milliseconds)', 'cpt-bootstrap-carousel'), // Title
+				array( $this, 'homepage_interval_callback' ), // Callback
+				'cpt-bootstrap-carousel', // Page
+				'cptbc_settings_homepage' // Section
+		);
 			 
 	}
 			
@@ -323,7 +347,7 @@ class cptbc_settings_page {
 	public function sanitize( $input ) {
 		$new_input = array();
 		foreach($input as $key => $var){
-			if($key == 'twbs' || $key == 'interval' || $key == 'background_images_height'){
+			if($key == 'twbs' || $key == 'interval' || $key == 'background_images_height' || $key == 'homepage_interval'){
 				$new_input[$key] = absint( $input[$key] );
 			} else if ($key == 'link_button_before' || $key == 'link_button_after' || $key == 'before_title' || $key == 'after_title' || $key == 'before_caption' || $key == 'after_caption' || $key == 'before_caption_div' || $key == 'after_caption_div'){
 				$new_input[$key] = $input[$key]; // Don't sanitise these, meant to be html!
@@ -346,6 +370,9 @@ class cptbc_settings_page {
 	}
 	public function cptbc_settings_markup_header() {
             echo '<p>'.__('Customise which CSS classes and HTML tags the Carousel uses.', 'cpt-bootstrap-carousel').'</p>';
+	}
+	public function cptbc_settings_homepage_header() {
+            echo '<p>'.__('Customise settings for the homepage carousel.', 'cpt-bootstrap-carousel').'</p>';
 	}
 			
 	// Callback functions - print the form inputs
@@ -608,6 +635,27 @@ class cptbc_settings_page {
 	public function after_caption_div_callback() {
 			printf('<input type="text" id="after_caption_div" name="cptbc_settings[after_caption_div]" value="%s" size="15" />',
 					isset( $this->options['after_caption_div'] ) ? esc_attr( $this->options['after_caption_div']) : '');
+	}
+
+	// Homepage section
+	public function homepage_autoplay_callback() {
+		print '<select id="homepage_autoplay" name="cptbc_settings[homepage_autoplay]">';
+		print '<option value="1"';
+		if(isset( $this->options['homepage_autoplay'] ) && $this->options['homepage_autoplay'] == 1){
+			print ' selected="selected"';
+		}
+		echo '>Yes (default)</option>';
+		print '<option value="0"';
+		if(isset( $this->options['homepage_autoplay'] ) && $this->options['homepage_autoplay'] == 0){
+			print ' selected="selected"';
+		}
+		echo '>No</option>';
+		print '</select>';
+	}
+	public function homepage_interval_callback() {
+		printf('<input type="text" id="homepage_interval" name="cptbc_settings[homepage_interval]" value="%s" size="15" />',
+				isset( $this->options['homepage_interval'] ) ? esc_attr( $this->options['homepage_interval']) : '');
+		echo '<p class="description">'.__('How long each image shows for before it slides. Set to 0 to disable animation.', 'cpt-bootstrap-carousel').'</p>';
 	}
 	
 }
